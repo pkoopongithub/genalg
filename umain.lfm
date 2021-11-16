@@ -1,0 +1,222 @@
+object frmMain: TfrmMain
+  Left = 428
+  Height = 621
+  Top = 281
+  Width = 1236
+  BorderStyle = bsDialog
+  Caption = 'GenAlgESS'
+  ClientHeight = 621
+  ClientWidth = 1236
+  OnClose = FormClose
+  OnCreate = FormCreate
+  ParentFont = True
+  LCLVersion = '1.6.4.0'
+  object pnlBottom: TPanel
+    Left = 0
+    Height = 52
+    Top = 569
+    Width = 1236
+    Align = alBottom
+    ClientHeight = 52
+    ClientWidth = 1236
+    TabOrder = 0
+    object btnNext: TButton
+      Left = 8
+      Height = 33
+      Top = 6
+      Width = 89
+      Caption = '&Nächster Zeittakt'
+      OnClick = Auswerten
+      TabOrder = 0
+    end
+    object btnStart: TButton
+      Left = 110
+      Height = 33
+      Top = 6
+      Width = 89
+      Caption = '&Start'
+      OnClick = btnStartClick
+      TabOrder = 1
+    end
+    object btnStopp: TButton
+      Left = 206
+      Height = 33
+      Top = 5
+      Width = 89
+      Caption = 'Sto&pp'
+      OnClick = btnStoppClick
+      TabOrder = 2
+    end
+  end
+  object Spielfeld: TDrawGrid
+    Left = 0
+    Height = 488
+    Top = 0
+    Width = 809
+    ColCount = 80
+    DefaultColWidth = 10
+    DefaultDrawing = False
+    DefaultRowHeight = 20
+    ExtendedSelect = False
+    FixedCols = 0
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine]
+    RowCount = 24
+    TabOrder = 1
+    OnDrawCell = SpielfeldDrawCell
+  end
+  object StatusMonitor: TStringGrid
+    Left = 848
+    Height = 326
+    Top = 10
+    Width = 88
+    ColCount = 3
+    FixedCols = 0
+    FixedRows = 0
+    RowCount = 16
+    TabOrder = 2
+    ColWidths = (
+      48
+      8
+      27
+    )
+    Cells = (
+      2
+      0
+      0
+      'ngfvwk'
+      2
+      0
+      'fit'
+    )
+  end
+  object StaticText1: TStaticText
+    Left = 950
+    Height = 17
+    Top = 18
+    Width = 65
+    Caption = 'Gene:'
+    TabOrder = 3
+  end
+  object StaticText2: TStaticText
+    Left = 950
+    Height = 17
+    Top = 40
+    Width = 65
+    Caption = 'n: Nahrung wahrnehmen'
+    TabOrder = 4
+  end
+  object StaticText3: TStaticText
+    Left = 950
+    Height = 17
+    Top = 64
+    Width = 65
+    Caption = 'g: Gefahr wahrnehmen'
+    TabOrder = 5
+  end
+  object StaticText4: TStaticText
+    Left = 952
+    Height = 17
+    Top = 88
+    Width = 65
+    Caption = 'f: Verdauen können'
+    TabOrder = 6
+  end
+  object StaticText5: TStaticText
+    Left = 950
+    Height = 17
+    Top = 112
+    Width = 65
+    Caption = 'v: Verteidigen können'
+    TabOrder = 7
+  end
+  object StaticText6: TStaticText
+    Left = 950
+    Height = 17
+    Top = 136
+    Width = 186
+    Caption = 'w: andere Weider erkennen können'
+    TabOrder = 8
+  end
+  object StaticText7: TStaticText
+    Left = 950
+    Height = 17
+    Top = 160
+    Width = 114
+    Caption = 'k:kooperieren können'
+    TabOrder = 9
+  end
+  object StaticText8: TStaticText
+    Left = 950
+    Height = 17
+    Top = 192
+    Width = 146
+    Caption = 'optimiert werden die Weider'
+    TabOrder = 10
+  end
+  object Shape1: TShape
+    Left = 954
+    Height = 26
+    Top = 222
+    Width = 12
+  end
+  object Shape2: TShape
+    Left = 954
+    Height = 26
+    Top = 256
+    Width = 12
+    Brush.Color = clLime
+  end
+  object Shape3: TShape
+    Left = 954
+    Height = 26
+    Top = 288
+    Width = 12
+    Brush.Color = clRed
+  end
+  object Shape4: TShape
+    Left = 954
+    Height = 26
+    Top = 320
+    Width = 12
+    Brush.Color = clYellow
+  end
+  object StaticText9: TStaticText
+    Left = 976
+    Height = 17
+    Top = 222
+    Width = 65
+    Caption = 'Lebensraum'
+    TabOrder = 11
+  end
+  object StaticText10: TStaticText
+    Left = 976
+    Height = 17
+    Top = 256
+    Width = 65
+    Caption = 'Weider'
+    TabOrder = 12
+  end
+  object StaticText11: TStaticText
+    Left = 976
+    Height = 17
+    Top = 288
+    Width = 65
+    Caption = 'Rauber'
+    TabOrder = 13
+  end
+  object StaticText12: TStaticText
+    Left = 976
+    Height = 17
+    Top = 320
+    Width = 96
+    Caption = 'WeiderNahrung'
+    TabOrder = 14
+  end
+  object tmrAnimation: TTimer
+    Interval = 40
+    OnTimer = Auswerten
+    left = 8
+    top = 8
+  end
+end
