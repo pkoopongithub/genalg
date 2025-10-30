@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ökologische Simulation - Zellularautomat & Genetischer Algorithmus</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      color: #212529;
+    }
+
+    header {
+      position: relative;
+      text-align: center;
+    }
+
+    header img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    footer {
+      background-color: #343a40;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    nav {
+      background-color: #343a40;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0.5rem 1rem;
+      font-weight: bold;
+    }
+
+    nav a:focus,
+    nav a:hover {
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: -0.5rem;
+    }
+
+    .col {
+      flex: 1 1 100%;
+      padding: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .col-md-4 {
+        flex: 0 0 33.3333%;
+      }
+    }
+
+    .p-3 {
+      padding: 1rem;
+    }
+
+    .mb-4 {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Hintergrund weiß für Text-Container */
+    .bg-light {
+      background-color: #ffffff;
+      text-align: justify;
+    }
+
+    /* Überschriften zentriert in den hellen Boxen */
+    .bg-light h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    /* Bilder nicht im Blocksatz */
+    .bg-light img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    /* Stile für die Ökologische Simulation */
+    .simulation-container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      margin-bottom: 2rem;
+    }
+
+    .simulation-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .simulation-controls button {
+      background: #2b6cff;
+      border: none;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .simulation-controls button.primary {
+      background: #22aa22;
+    }
+
+    .simulation-controls button.danger {
+      background: #cc3333;
+    }
+
+    .simulation-panel {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.1);
+      margin-bottom: 8px;
+    }
+
+    .simulation-grid-container {
+      display: grid;
+      grid-template-columns: repeat(80, 8px);
+      grid-template-rows: repeat(24, 8px);
+      gap: 1px;
+      background: #bdc3c7;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+
+    .simulation-cell {
+      width: 8px;
+      height: 8px;
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .cell-empty { background: #ecf0f1; }
+    .cell-nahrung { background: #f1c40f; }
+    .cell-rauber { background: #e74c3c; }
+    .cell-weider { background: #27ae60; }
+
+    .simulation-legend {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .simulation-swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,.5);
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .simulation-label {
+      font-size: 13px;
+      color: #6c757d;
+    }
+
+    .simulation-info {
+      font-size: 12px;
+      color: #6c757d;
+      margin-left: 6px;
+    }
+
+    .simulation-export {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-value {
+      font-size: 2em;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+
+    /* Neue Styles für Gen-Anzeige */
+    .gen-display {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .gen-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    .gen-table th {
+      background: #34495e;
+      color: white;
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .gen-table td {
+      padding: 8px;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .gen-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .gen-table tr:hover {
+      background: #e8f4f8;
+    }
+
+    .gen-code {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .gen-active {
+      background: #d4edda !important;
+      border-left: 4px solid #28a745;
+    }
+
+    .gen-inactive {
+      opacity: 0.6;
+    }
+
+    .fitness-bar {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fitness-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f);
+      transition: width 0.3s ease;
+    }
+
+    .gen-legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+      font-size: 0.8em;
+    }
+
+    .gen-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gen-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    .color-fn { background: #3498db; }
+    .color-fg { background: #e74c3c; }
+    .color-rn { background: #27ae60; }
+    .color-rg { background: #f39c12; }
+    .color-fk { background: #9b59b6; }
+    .color-rk { background: #1abc9c; }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #34495e;
+      border-radius: 5px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3498db, #2ecc71);
+      transition: width 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .simulation-grid-container {
+        grid-template-columns: repeat(40, 6px);
+        grid-template-rows: repeat(24, 6px);
+      }
+      
+      .simulation-cell {
+        width: 6px;
+        height: 6px;
+      }
+      
+      .gen-table {
+        font-size: 0.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="img/headerbild.jpeg" alt="Headerbild" />
+  </header>
+
+  <nav>
+    <a href="https://pkoopongithub.github.io/">Home</a>
+    <a href="https://pkoopongithub.github.io/duesseldorfer-schuelerinventar-bootstrap-mysql-php/">Düsk</a>
+    <a href="https://pkoopongithub.github.io/algorithmisch-rekursive-sequenzanalyse/">Ars</a>
+    <a href="https://pkoopongithub.github.io/Projekt_Pompeji/">Pompeji</a>
+    <a href="https://pkoopongithub.github.io/DavidDeutschMetaphysicalMeditations/">Pencil</a>
+    <a href="https://pkoopongithub.github.io/primaten/">Primaten</a>
+    <a href="https://pkoopongithub.github.io/genalg/">Ökologische Simulation</a>
+  </nav>
+
+<div class="container">
+  <h1 class="mb-4 text-center">Ökologische Simulation</h1>
+  <p class="mb-4 text-center">Zellularautomat mit Genetischem Algorithmus - Räuber-Beute-System mit evolutionärer Anpassung</p>
+  <p class="mb-4 text-center">Cellular automaton with genetic algorithm - Predator-prey system with evolutionary adaptation</p>
+    
+  <div class="row">
+    <div class="col col-md-4">
+      <div class="p-3 bg-light">
+        <h2>Ökologische Simulation</h2>
+        <p>
+          Diese Simulation kombiniert Zellularautomaten mit genetischen Algorithmen zur Modellierung von Räuber-Beute-Beziehungen. Weider (Pflanzenfresser) entwickeln durch evolutionäre Prozesse Strategien zur Nahrungssuche, Gefahrenerkennung und Kooperation. Das System zeigt emergente Phänomene ökologischer Dynamiken.
+        </p>
+        <p>
+          This simulation combines cellular automata with genetic algorithms to model predator-prey relationships. Grazers develop strategies for foraging, danger recognition, and cooperation through evolutionary processes. The system shows emergent phenomena of ecological dynamics.
+        </p>
+        <div class="text-center" style="margin-top: 2rem;">
+          <a href="https://github.com/pkoopongithub/genalg" class="btn">Mehr erfahren / Learn more</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-md-4">
+      <div class="p-3 bg-light">
+        <h2>Genetischer Algorithmus</h2>
+        <p>
+          Sechs Gene steuern das Verhalten der Weider: Nahrungserkennung, Gefahrenwahrnehmung, Fressverhalten, Verteidigung, Artgenossenerkennung und Kooperation. Durch Selektion, Crossover und Mutation entstehen optimierte Überlebensstrategien über Generationen hinweg.
+        </p>
+        <p>
+          Six genes control grazer behavior: food recognition, danger perception, feeding behavior, defense, conspecific recognition, and cooperation. Through selection, crossover and mutation, optimized survival strategies emerge across generations.
+        </p>
+        <div class="text-center" style="margin-top: 2rem;">
+          <a href="https://github.com/pkoopongithub/genalg" class="btn">Mehr erfahren / Learn more</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col col-md-4">
+      <div class="p-3 bg-light">
+        <h2>Zellularautomat</h2>
+        <p>
+          Auf einem 80x24 Torus-Gitter interagieren Nahrung, Räuber und Weider nach lokalen Regeln. Das System zeigt komplexe Musterbildung, Populationszyklen und räumliche Selbstorganisation trotz einfacher Einzelregeln.
+        </p>
+        <p>
+          On an 80x24 torus grid, food, predators and grazers interact according to local rules. The system shows complex pattern formation, population cycles and spatial self-organization despite simple individual rules.
+        </p>
+        <div class="text-center" style="margin-top: 2rem;">
+          <a href="https://github.com/pkoopongithub/genalg" class="btn">Mehr erfahren / Learn more</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Ökologische Simulation -->
+  <div class="simulation-container">
+    <h2>Ökologische Simulation - Zellularautomat & Genetischer Algorithmus</h2>
+    
+    <div class="simulation-controls">
+      <button id="btnStart" class="primary">▶ Start</button>
+      <button id="btnStop" class="danger">⏸ Stopp</button>
+      <button id="btnReset">🔁 Zurücksetzen</button>
+
+      <label class="simulation-label" style="margin-left:8px">Geschwindigkeit:
+        <select id="selSpeed">
+          <option value="500">Langsam</option>
+          <option value="300">Mittel</option>
+          <option value="150" selected>Schnell</option>
+          <option value="50">Sehr schnell</option>
+        </select>
+      </label>
+
+      <div id="evolutionInfo" class="simulation-info">Bereit zur Simulation</div>
+    </div>
+
+    <div class="simulation-panel" style="margin-bottom:8px; display:flex;gap:16px;">
+      <div><strong>Generation:</strong> <span id="generationCount">1</span></div>
+      <div><strong>Nahrung:</strong> <span id="countNahrung">0</span></div>
+      <div><strong>Räuber:</strong> <span id="countRauber">0</span></div>
+      <div><strong>Weider:</strong> <span id="countWeider">0</span></div>
+      <div><strong>Durchschnittliche Fitness:</strong> <span id="avgFitness">80</span></div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="simulation-panel">
+          <div class="simulation-grid-container" id="gridContainer"></div>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="statNahrung">0</div>
+              <div class="stat-label">Nahrung</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statRauber">0</div>
+              <div class="stat-label">Räuber</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="statWeider">0</div>
+              <div class="stat-label">Weider</div>
+            </div>
+          </div>
+
+          <div class="simulation-legend">
+            <div><span class="simulation-swatch" style="background:#ecf0f1"></span> Leer</div>
+            <div><span class="simulation-swatch" style="background:#f1c40f"></span> Nahrung</div>
+            <div><span class="simulation-swatch" style="background:#e74c3c"></span> Räuber</div>
+            <div><span class="simulation-swatch" style="background:#27ae60"></span> Weider</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="simulation-panel">
+          <div class="simulation-label">Genetische Information</div>
+          <div>Generation: <span id="currentGeneration">1</span></div>
+          <div>Aktive Genome: <span id="activeGenomes">0</span></div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="evolutionProgress" style="width: 0%"></div>
+          </div>
+          
+          <div style="margin-top: 15px;">
+            <h4>Simulationsparameter</h4>
+            <div style="margin: 10px 0;">
+              <label>Mutationsrate:</label>
+              <input type="range" id="mutationRate" min="1" max="20" value="10">
+              <span id="mutationValue">10%</span>
+            </div>
+            <div style="margin: 10px 0;">
+              <label>Selektionsdruck:</label>
+              <input type="range" id="selectionPressure" min="10" max="50" value="25">
+              <span id="selectionValue">25%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Neue Gen-Anzeige -->
+        <div class="gen-display">
+          <h4>Genetische Codes - Generation <span id="displayGeneration">1</span></h4>
+          <div class="gen-legend">
+            <div class="gen-legend-item">
+              <div class="gen-color color-fn"></div>
+              <span>Fn: Nahrung erkennen</span>
+            </div>
+            <div class="gen-legend-item">
+              <div class="gen-color color-fg"></div>
+              <span>Fg: Gefahr erkennen</span>
+            </div>
+            <div class="gen-legend-item">
+              <div class="gen-color color-rn"></div>
+              <span>Rn: Fressen</span>
+            </div>
+            <div class="gen-legend-item">
+              <div class="gen-color color-rg"></div>
+              <span>Rg: Verteidigung</span>
+            </div>
+            <div class="gen-legend-item">
+              <div class="gen-color color-fk"></div>
+              <span>Fk: Weider erkennen</span>
+            </div>
+            <div class="gen-legend-item">
+              <div class="gen-color color-rk"></div>
+              <span>Rk: Kooperieren</span>
+            </div>
+          </div>
+          <table class="gen-table" id="genTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Gen-Code</th>
+                <th>Fitness</th>
+                <th>Aktiv</th>
+                <th>Verteilung</th>
+              </tr>
+            </thead>
+            <tbody id="genTableBody">
+              <!-- Wird dynamisch gefüllt -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<footer>
+  Paul Koop &middot; Thomashofstraße 19 &middot; 52070 Aachen<br />
+  <a href="https://github.com/pkoopongithub/pkoopongithub.github.io/discussions/1" style="color: #ffc107; text-decoration: none;">Zur Diskussion auf GitHub</a>
+  
+  <a href="https://github.com/pkoopongithub/genalg" style="color: #ffc107; text-decoration: none;">
+    Ökologische Simulation auf GitHub
+  </a>
+</footer>
+
+<script>
+// KORRIGIERTE Version - Optimierte Parameter für bessere Evolution
+
+// Konstanten aus dem Pascal-Code
+const Fn = 1, Fg = 2, Rn = 3, Rg = 4, Fk = 5, Rk = 6;
+const maxfit = 80;
+const stoffwechsel = -1;
+
+// OPTIMIERTE Globale Variablen
+let simulationRunning = false;
+let simulationInterval;
+let currentSpeed = 150;
+let generation = 1;
+let evolutionCounter = 0;
+
+// Torus-Größe
+const COLS = 80;
+const ROWS = 24;
+
+// Zelltypen
+const CELL_EMPTY = 0;
+const CELL_NAHRUNG = 1;
+const CELL_RAUBER = 2;
+const CELL_WEIDER = 3;
+
+// Gen-Klasse
+class Gen {
+    constructor() {
+        this.g = Array(7).fill(null).map(() => Math.random() > 0.5 ? '1' : '0');
+        this.id = Math.random().toString(36).substr(2, 9);
+    }
+}
+
+// OPTIMIERTE Weider-Klasse
+class Weider {
+    constructor(gen = null) {
+        this.gen = gen || new Gen();
+        this.fit = maxfit;
+        this.initTraits();
+    }
+
+    initTraits() {
+        this.Fg = this.gen.g[Fg] === '1';
+        this.Fn = this.gen.g[Fn] === '1';
+        this.Rg = this.gen.g[Rg] === '1';
+        this.Rn = this.gen.g[Rn] === '1';
+        this.Fk = this.gen.g[Fk] === '1';
+        this.Rk = this.gen.g[Rk] === '1';
+        this.verteidigen = false;
+        this.gefahr = false;
+        this.futter = false;
+        this.weidererkennen = false;
+        this.kooperieren = false;
+    }
+
+    getfit() { return this.fit; }
+    getgefahr() { return this.gefahr; }
+    getverteidigen() { return this.verteidigen; }
+    getfressen() { return this.Rn; }
+
+    Bgefahr(grid, x, y) {
+        if (!this.Fg) {
+            this.gefahr = false;
+            return;
+        }
+
+        let dangerCount = 0;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = (x + dx + COLS) % COLS;
+                const ny = (y + dy + ROWS) % ROWS;
+                if (grid[ny][nx] === CELL_RAUBER) {
+                    dangerCount++;
+                }
+            }
+        }
+        this.gefahr = dangerCount > 0;
+    }
+
+    Bfutter(grid, x, y) {
+        if (!this.Fn) {
+            this.futter = false;
+            return;
+        }
+
+        let foodCount = 0;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = (x + dx + COLS) % COLS;
+                const ny = (y + dy + ROWS) % ROWS;
+                if (grid[ny][nx] === CELL_NAHRUNG) {
+                    foodCount++;
+                }
+            }
+        }
+        this.futter = foodCount > 0;
+    }
+
+    Rweidererkennen(grid, x, y) {
+        let weiderCount = 0;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = (x + dx + COLS) % COLS;
+                const ny = (y + dy + ROWS) % ROWS;
+                if (grid[ny][nx] === CELL_WEIDER) {
+                    weiderCount++;
+                }
+            }
+        }
+        this.weidererkennen = (weiderCount > 0) && this.Fk;
+    }
+
+    getkooperatoren(grid, x, y, weiderList) {
+        let cooperators = 0;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = (x + dx + COLS) % COLS;
+                const ny = (y + dy + ROWS) % ROWS;
+                if (grid[ny][nx] === CELL_WEIDER) {
+                    const neighbor = weiderList.find(w => w.x === nx && w.y === ny);
+                    if (neighbor && neighbor.weider.kooperieren) {
+                        cooperators++;
+                    }
+                }
+            }
+        }
+        return cooperators;
+    }
+
+    Rkooperieren() {
+        this.kooperieren = this.weidererkennen && this.Rk;
+    }
+
+    // KORRIGIERT: Bessere Fress-Logik mit Nahrungs-Verbrauch
+    Rfressen(grid, x, y, weiderList) {
+        if (this.futter && this.Rn) {
+            // Suche nach benachbarter Nahrung und konsumiere sie
+            let gefressen = false;
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = (x + dx + COLS) % COLS;
+                    const ny = (y + dy + ROWS) % ROWS;
+                    if (grid[ny][nx] === CELL_NAHRUNG) {
+                        // Nahrung wird gefressen und verschwindet
+                        grid[ny][nx] = CELL_EMPTY;
+                        gefressen = true;
+                        
+                        // OPTIMIERT: Höhere Fitness-Belohnung
+                        const cooperators = this.getkooperatoren(grid, x, y, weiderList);
+                        let fitnessGewinn = 12; // Basis-Fitness (statt 1)
+                        
+                        if (this.kooperieren && cooperators > 0) {
+                            fitnessGewinn += cooperators * 3; // Kooperations-Bonus
+                        } else if (!this.kooperieren) {
+                            fitnessGewinn += 5; // Bonus für eigenständiges Fressen
+                        }
+                        
+                        this.fit += fitnessGewinn;
+                        break;
+                    }
+                }
+                if (gefressen) break;
+            }
+        }
+    }
+
+    Rverteidigung() {
+        this.verteidigen = this.gefahr && this.Rg;
+    }
+
+    Rfit(zahl) {
+        this.fit += zahl;
+    }
+
+    nloeschen(grid, x, y) {
+        let weiderCount = 0;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = (x + dx + COLS) % COLS;
+                const ny = (y + dy + ROWS) % ROWS;
+                if (grid[ny][nx] === CELL_WEIDER) {
+                    weiderCount++;
+                }
+            }
+        }
+        return weiderCount > 3;
+    }
+}
+
+// Simulationszustand
+let currentGrid = Array(ROWS).fill().map(() => Array(COLS).fill(CELL_EMPTY));
+let weiderList = [];
+let genPool = [];
+
+// Initialisierung
+function initializeSimulation() {
+    // Gen-Pool erstellen
+    genPool = Array(16).fill().map(() => new Gen());
+    
+    // Weider mit Genen initialisieren
+    weiderList = [];
+    for (let i = 0; i < 16; i++) {
+        weiderList.push({
+            weider: new Weider(genPool[i]),
+            x: 0,
+            y: 0,
+            active: false
+        });
+    }
+
+    // Zufällige Startverteilung
+    randomizeGrid();
+    updateGenDisplay();
+    updateDisplay();
+}
+
+function randomizeGrid() {
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            const rand = Math.random() * 100;
+            // OPTIMIERT: Mehr Nahrung (12% statt 2%)
+            if (rand < 12) {
+                currentGrid[y][x] = CELL_NAHRUNG;
+            } else if (rand < 15) {
+                currentGrid[y][x] = CELL_RAUBER;
+            } else if (rand < 25) { // Mehr Weider am Start
+                const inactiveWeider = weiderList.find(w => !w.active);
+                if (inactiveWeider) {
+                    inactiveWeider.x = x;
+                    inactiveWeider.y = y;
+                    inactiveWeider.active = true;
+                    currentGrid[y][x] = CELL_WEIDER;
+                } else {
+                    currentGrid[y][x] = CELL_EMPTY;
+                }
+            } else {
+                currentGrid[y][x] = CELL_EMPTY;
+            }
+        }
+    }
+}
+
+// OPTIMIERTE Zellularautomat-Regeln
+function nextGeneration() {
+    const newGrid = Array(ROWS).fill().map(() => Array(COLS).fill(CELL_EMPTY));
+    const newWeiderList = [];
+
+    // OPTIMIERT: Mehr Nahrungs-Generierung
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            const cell = currentGrid[y][x];
+            
+            if (cell === CELL_NAHRUNG) {
+                // Nahrung kann sich vermehren
+                if (Math.random() < 0.15) { // Höhere Vermehrungsrate
+                    newGrid[y][x] = CELL_NAHRUNG;
+                }
+            } else if (cell === CELL_RAUBER) {
+                // Räuber-Verhalten optimiert
+                const weiderCount = countNeighbors(x, y, CELL_WEIDER);
+                if (weiderCount >= 1 && Math.random() < 0.8) { // Effizientere Jagd
+                    newGrid[y][x] = CELL_RAUBER;
+                } else if (Math.random() < 0.2) {
+                    newGrid[y][x] = CELL_RAUBER;
+                }
+            }
+        }
+    }
+
+    // Weider verarbeiten
+    weiderList.forEach(weiderData => {
+        if (!weiderData.active) return;
+
+        const { weider, x, y } = weiderData;
+        
+        // Weider-Logik anwenden
+        weider.Bgefahr(currentGrid, x, y);
+        weider.Bfutter(currentGrid, x, y);
+        weider.Rweidererkennen(currentGrid, x, y);
+        weider.Rkooperieren();
+        weider.Rfressen(currentGrid, x, y, weiderList); // Jetzt mit Nahrungs-Verbrauch
+        weider.Rverteidigung();
+        weider.Rfit(stoffwechsel);
+
+        // Überlebensprüfung
+        if (weider.getfit() <= 0 || weider.nloeschen(currentGrid, x, y)) {
+            return;
+        }
+
+        if (weider.gefahr && !weider.verteidigen) {
+            // Wird von Räuber gefressen
+            return;
+        }
+
+        // Bewegung und Vermehrung
+        const newX = (x + Math.floor(Math.random() * 3) - 1 + COLS) % COLS;
+        const newY = (y + Math.floor(Math.random() * 3) - 1 + ROWS) % ROWS;
+
+        if (newGrid[newY][newX] === CELL_EMPTY) {
+            newGrid[newY][newX] = CELL_WEIDER;
+            newWeiderList.push({
+                weider: weider,
+                x: newX,
+                y: newY,
+                active: true
+            });
+
+            // Vermehrung bei guter Fitness
+            if (weider.getfit() > maxfit * 0.7 && Math.random() < 0.15) { // Höhere Vermehrungsrate
+                const childX = (newX + Math.floor(Math.random() * 3) - 1 + COLS) % COLS;
+                const childY = (newY + Math.floor(Math.random() * 3) - 1 + ROWS) % ROWS;
+                if (newGrid[childY][childX] === CELL_EMPTY) {
+                    newGrid[childY][childX] = CELL_WEIDER;
+                    const childGen = crossover(weider.gen, weiderList[Math.floor(Math.random() * weiderList.length)].weider.gen);
+                    newWeiderList.push({
+                        weider: new Weider(childGen),
+                        x: childX,
+                        y: childY,
+                        active: true
+                    });
+                }
+            }
+        }
+    });
+
+    // OPTIMIERT: Mehr zufällige Nahrung und Räuber
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            if (newGrid[y][x] === CELL_EMPTY) {
+                const rand = Math.random() * 100;
+                if (rand < 10) newGrid[y][x] = CELL_NAHRUNG;      // 10% Nahrung (statt 2%)
+                else if (rand < 12) newGrid[y][x] = CELL_RAUBER;  // 2% Räuber
+            }
+        }
+    }
+
+    currentGrid = newGrid;
+    weiderList = newWeiderList;
+
+    evolutionCounter++;
+    if (evolutionCounter >= 8) { // Schnellere Evolution (statt 10)
+        applyGeneticAlgorithm();
+        evolutionCounter = 0;
+        generation++;
+        document.getElementById('generationCount').textContent = generation;
+        document.getElementById('currentGeneration').textContent = generation;
+        document.getElementById('displayGeneration').textContent = generation;
+    }
+
+    updateGenDisplay();
+    updateDisplay();
+}
+
+function countNeighbors(x, y, cellType) {
+    let count = 0;
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            if (dx === 0 && dy === 0) continue;
+            const nx = (x + dx + COLS) % COLS;
+            const ny = (y + dy + ROWS) % ROWS;
+            if (currentGrid[ny][nx] === cellType) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+// OPTIMIERTER Genetischer Algorithmus
+function crossover(gen1, gen2) {
+    const child = new Gen();
+    const crossoverPoint = Math.floor(Math.random() * 6);
+    
+    for (let i = 0; i <= crossoverPoint; i++) {
+        child.g[i] = gen1.g[i];
+    }
+    for (let i = crossoverPoint + 1; i < 6; i++) {
+        child.g[i] = gen2.g[i];
+    }
+
+    // Mutation basierend auf eingestellter Rate
+    const mutationRate = document.getElementById('mutationRate').value / 100;
+    if (Math.random() < mutationRate) {
+        const mutationPoint = Math.floor(Math.random() * 6);
+        child.g[mutationPoint] = child.g[mutationPoint] === '1' ? '0' : '1';
+    }
+
+    return child;
+}
+
+function applyGeneticAlgorithm() {
+    const sortedWeiders = [...weiderList]
+        .filter(w => w.active)
+        .sort((a, b) => b.weider.getfit() - a.weider.getfit());
+
+    if (sortedWeiders.length < 2) return;
+
+    // OPTIMIERT: Stärkere Selektion
+    const selectionPressure = document.getElementById('selectionPressure').value / 100;
+    const selectionCount = Math.max(2, Math.floor(sortedWeiders.length * selectionPressure));
+    const bestGenes = sortedWeiders.slice(0, selectionCount).map(w => w.weider.gen);
+
+    const newGenPool = [...bestGenes];
+    
+    // OPTIMIERT: Mehr Crossover für bessere Durchmischung
+    while (newGenPool.length < 16) {
+        const parent1 = bestGenes[Math.floor(Math.random() * bestGenes.length)];
+        const parent2 = bestGenes[Math.floor(Math.random() * bestGenes.length)];
+        
+        // Zwei Kinder pro Paarung für mehr genetische Vielfalt
+        const child1 = crossover(parent1, parent2);
+        const child2 = crossover(parent2, parent1);
+        
+        newGenPool.push(child1);
+        if (newGenPool.length < 16) newGenPool.push(child2);
+        
+        // Manchmal drittes Kind für noch mehr Vielfalt
+        if (newGenPool.length < 14 && Math.random() < 0.3) {
+            const child3 = crossover(parent1, parent2);
+            newGenPool.push(child3);
+        }
+    }
+
+    genPool = newGenPool;
+    
+    // Weider mit neuen Genen aktualisieren
+    weiderList.forEach((weiderData, index) => {
+        if (index < genPool.length) {
+            weiderData.weider = new Weider(genPool[index]);
+        }
+    });
+
+    const avgFitness = sortedWeiders.reduce((sum, w) => sum + w.weider.getfit(), 0) / Math.max(1, sortedWeiders.length);
+    document.getElementById('avgFitness').textContent = Math.round(avgFitness);
+    document.getElementById('evolutionProgress').style.width = `${Math.min(100, (generation % 100))}%`;
+    
+    // Evolutions-Info aktualisieren
+    const bestGen = sortedWeiders[0].weider.gen.g.slice(1, 7).join('');
+    document.getElementById('evolutionInfo').textContent = `Bester Gen-Code: ${bestGen}`;
+}
+
+// Funktion für Gen-Anzeige
+function updateGenDisplay() {
+    const tableBody = document.getElementById('genTableBody');
+    tableBody.innerHTML = '';
+
+    // Gen-Statistiken sammeln
+    const genUsage = {};
+    weiderList.forEach(weiderData => {
+        if (weiderData.active) {
+            const genId = weiderData.weider.gen.id;
+            genUsage[genId] = (genUsage[genId] || 0) + 1;
+        }
+    });
+
+    let activeGenomes = 0;
+    const sortedGenPool = [...genPool].sort((a, b) => {
+        const usageA = genUsage[a.id] || 0;
+        const usageB = genUsage[b.id] || 0;
+        return usageB - usageA;
+    });
+
+    sortedGenPool.forEach((gen, index) => {
+        const isActive = genUsage[gen.id] > 0;
+        if (isActive) activeGenomes++;
+
+        const row = document.createElement('tr');
+        if (isActive) {
+            row.classList.add('gen-active');
+        } else {
+            row.classList.add('gen-inactive');
+        }
+
+        const usageCount = genUsage[gen.id] || 0;
+        const fitness = weiderList.find(w => w.weider.gen.id === gen.id)?.weider.getfit() || 0;
+        const fitnessPercent = Math.min(100, (fitness / maxfit) * 100);
+
+        // Farbige Gen-Darstellung
+        let genDisplay = '';
+        for (let i = 1; i <= 6; i++) {
+            const colorClass = `color-${getGenName(i)}`;
+            genDisplay += `<span class="${colorClass}" style="color: white; padding: 2px 4px; margin: 0 1px; border-radius: 2px; font-weight: bold;">${gen.g[i]}</span>`;
+        }
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>
+                <div class="gen-code">${genDisplay}</div>
+                <small style="color: #666;">${getGenDescription(gen)}</small>
+            </td>
+            <td>${fitness}</td>
+            <td>${isActive ? '✓' : '✗'} (${usageCount})</td>
+            <td>
+                <div class="fitness-bar">
+                    <div class="fitness-fill" style="width: ${fitnessPercent}%"></div>
+                </div>
+                ${Math.round(fitnessPercent)}%
+            </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+
+    document.getElementById('activeGenomes').textContent = activeGenomes;
+}
+
+function getGenName(index) {
+    const names = {1: 'fn', 2: 'fg', 3: 'rn', 4: 'rg', 5: 'fk', 6: 'rk'};
+    return names[index];
+}
+
+function getGenDescription(gen) {
+    const traits = [];
+    if (gen.g[Fn] === '1') traits.push('Nahrung');
+    if (gen.g[Fg] === '1') traits.push('Gefahr');
+    if (gen.g[Rn] === '1') traits.push('Fressen');
+    if (gen.g[Rg] === '1') traits.push('Verteidigen');
+    if (gen.g[Fk] === '1') traits.push('Weider');
+    if (gen.g[Rk] === '1') traits.push('Kooperieren');
+    return traits.join(', ') || 'Passiv';
+}
+
+// Display-Funktionen
+function updateDisplay() {
+    const grid = document.getElementById('gridContainer');
+    grid.innerHTML = '';
+
+    let nahrungCount = 0;
+    let rauberCount = 0;
+    let weiderCount = 0;
+
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'simulation-cell ';
+            
+            switch (currentGrid[y][x]) {
+                case CELL_NAHRUNG:
+                    cell.classList.add('cell-nahrung');
+                    nahrungCount++;
+                    break;
+                case CELL_RAUBER:
+                    cell.classList.add('cell-rauber');
+                    rauberCount++;
+                    break;
+                case CELL_WEIDER:
+                    cell.classList.add('cell-weider');
+                    weiderCount++;
+                    break;
+                default:
+                    cell.classList.add('cell-empty');
+            }
+            
+            grid.appendChild(cell);
+        }
+    }
+
+    document.getElementById('countNahrung').textContent = nahrungCount;
+    document.getElementById('countRauber').textContent = rauberCount;
+    document.getElementById('countWeider').textContent = weiderCount;
+    document.getElementById('statNahrung').textContent = nahrungCount;
+    document.getElementById('statRauber').textContent = rauberCount;
+    document.getElementById('statWeider').textContent = weiderCount;
+}
+
+// Steuerungsfunktionen
+function startSimulation() {
+    if (!simulationRunning) {
+        simulationRunning = true;
+        simulationInterval = setInterval(nextGeneration, currentSpeed);
+        document.getElementById('evolutionInfo').textContent = 'Simulation läuft...';
+    }
+}
+
+function stopSimulation() {
+    simulationRunning = false;
+    clearInterval(simulationInterval);
+    document.getElementById('evolutionInfo').textContent = 'Simulation gestoppt';
+}
+
+function resetSimulation() {
+    stopSimulation();
+    generation = 1;
+    evolutionCounter = 0;
+    document.getElementById('generationCount').textContent = '1';
+    document.getElementById('currentGeneration').textContent = '1';
+    document.getElementById('displayGeneration').textContent = '1';
+    document.getElementById('avgFitness').textContent = '80';
+    document.getElementById('activeGenomes').textContent = '0';
+    document.getElementById('evolutionProgress').style.width = '0%';
+    document.getElementById('evolutionInfo').textContent = 'Simulation zurückgesetzt';
+    initializeSimulation();
+}
+
+function updateSpeed() {
+    currentSpeed = parseInt(document.getElementById('selSpeed').value);
+    if (simulationRunning) {
+        stopSimulation();
+        startSimulation();
+    }
+}
+
+// Event-Handler
+document.getElementById('btnStart').onclick = startSimulation;
+document.getElementById('btnStop').onclick = stopSimulation;
+document.getElementById('btnReset').onclick = resetSimulation;
+document.getElementById('selSpeed').onchange = updateSpeed;
+document.getElementById('mutationRate').oninput = function() {
+    document.getElementById('mutationValue').textContent = this.value + '%';
+};
+document.getElementById('selectionPressure').oninput = function() {
+    document.getElementById('selectionValue').textContent = this.value + '%';
+};
+
+// Initialisierung beim Laden
+window.onload = initializeSimulation;
+</script>
+
+</body>
+</html>
